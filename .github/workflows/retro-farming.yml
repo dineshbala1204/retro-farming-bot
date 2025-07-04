@@ -2,39 +2,26 @@ name: Retro Airdrop Farming
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Runs daily at 6:00 AM UTC (~11:30 AM IST)
+    - cron: '0 0 * * *' # runs every day at midnight UTC
   workflow_dispatch:
 
 jobs:
-  build:
+  run-farming-script:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run Zora farming
+      - name: Run retro farming bot
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: node zoraFarming.js
-
-      - name: Run Scroll farming
-        run: node scrollFarming.js
-
-      - name: Run Base farming
-        run: node baseFarming.js
-
-      - name: Run Starknet farming
-        run: node starknetFarming.js
-
-      - name: Run Blast farming
-        run: node blastFarming.js
-
-      - name: Run Linea farming
-        run: node lineaFarming.js
 
