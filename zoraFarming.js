@@ -1,26 +1,46 @@
-// zoraFarming.js — Free Retro Farming Only
+// multiFarming.js — Final Retro Airdrop Farming Script
 
 const { ethers } = require("ethers");
 require("dotenv").config();
 
-const provider = new ethers.JsonRpcProvider("https://rpc.zora.energy");
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+const networks = [
+  {
+    name: "Zora",
+    rpc: "https://rpc.zora.energy",
+    address: "0xCa21D4228cDcc6FabaB20cF10c1345FE5CC06dF4",
+  },
+  {
+    name: "Base",
+    rpc: "https://mainnet.base.org",
+    address: "0xCa21D4228cDcc6FabaB20cF10c1345FE5CC06dF4",
+  },
+  {
+    name: "Scroll",
+    rpc: "https://rpc.scroll.io",
+    address: "0xCa21D4228cDcc6FabaB20cF10c1345FE5CC06dF4",
+  },
+  {
+    name: "Linea",
+    rpc: "https://rpc.linea.build",
+    address: "0xCa21D4228cDcc6FabaB20cF10c1345FE5CC06dF4",
+  },
+  {
+    name: "zkSync",
+    rpc: "https://mainnet.era.zksync.io",
+    address: "0xCa21D4228cDcc6FabaB20cF10c1345FE5CC06dF4",
+  },
+  {
+    name: "Blast",
+    rpc: "https://rpc.blast.io",
+    address: "0xCa21D4228cDcc6FabaB20cF10c1345FE5CC06dF4",
+  },
+];
 
-async function main() {
-  console.log("🔁 Starting Zora Retro Farming (Free Only)...");
+async function runOnNetwork({ name, rpc, address }) {
+  const provider = new ethers.JsonRpcProvider(rpc);
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
-  try {
-    // Try a harmless read to simulate contract interaction (optional)
-    const contract = new ethers.Contract(
-      "0xca21d4228cdcc6fabaB20cf10c1345fe5cc06df4",
-      ["function name() view returns (string)"],
-      provider
-    );
-    const name = await contract.name();
-    console.log("📛 NFT Contract Name:", name);
-  } catch (err) {
-    console.log("⚠️ Skipping contract read due to checksum error:", err.message);
-  }
+  console.log(`🔁 Running: ${name} Farming Check...`);
 
   try {
     const tx = {
@@ -28,21 +48,27 @@ async function main() {
       value: 0,
     };
 
-    const estimatedGas = await provider.estimateGas({ ...tx, from: wallet.address });
+    const estimatedGas = await wallet.estimateGas(tx);
 
-    if (estimatedGas.toString() === "0") {
-      console.log("✅ Free interaction allowed. Sending transaction...");
+    if (BigInt(estimatedGas.toString()) === 0n) {
+      console.log(`✅ ${name}: Free interaction allowed. Sending TX...`);
       const sentTx = await wallet.sendTransaction(tx);
       await sentTx.wait();
-      console.log("🎉 Interaction done on Zora (simulated). TX Hash:", sentTx.hash);
+      console.log(`🎉 ${name} TX Success: ${sentTx.hash}`);
     } else {
-      console.log("❌ Skipped: Transaction requires gas. Waiting for real airdrop tasks...");
+      console.log(`❌ ${name}: Gas required. Skipping...`);
     }
   } catch (err) {
-    console.log("⚠️ Error simulating transaction:", err.message);
+    console.log(`⚠️ ${name}: Connection Error: ${err.message}`);
+  }
+}
+
+async function main() {
+  for (const net of networks) {
+    await runOnNetwork(net);
   }
 
-  console.log("✅ Finished Zora Free Farming");
+  console.log("\n📊 Farming Run Complete.");
 }
 
 main();
